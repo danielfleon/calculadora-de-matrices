@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Avanzada de Matrices</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --light: #ecf0f1;
+            --dark: #333;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .matrix-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+        
+        .matrix-grid {
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        table {
+            border-collapse: collapse;
+            margin: 15px auto;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+        
+        input.matrix-cell {
+            width: 70px;
+            padding: 8px 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .step-by-step {
+            margin-top: 40px;
+        }
+        
+        .step {
+            background-color: white;
+            border-left: 5px solid var(--secondary);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--secondary);
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .step-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            padding-left: 25px;
+        }
+        
+        .step-description {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .pivot-highlight {
+            background-color: rgba(52, 152, 219, 0.2);
+            font-weight: bold;
+        }
+        
+        .operation-highlight {
+            background-color: rgba(46, 204, 113, 0.2);
+        }
+        
+        .scrollable-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            input.matrix-cell {
+                width: 50px;
+                padding: 6px 8px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora Avanzada de Matrices</h1>
+        <p>Reducción por Gauss-Jordan con todos los pasos detallados</p>
+    </header>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="rows">Filas:</label>
+            <input type="number" id="rows" min="1" max="15" value="3">
+        </div>
+        <div class="control-group">
+            <label for="cols">Columnas:</label>
+            <input type="number" id="cols" min="1" max="15" value="3">
+        </div>
+        <div class="control-group">
+            <label for="precision">Precisión decimal:</label>
+            <select id="precision">
+                <option value="2">2 decimales</option>
+                <option value="4" selected>4 decimales</option>
+                <option value="6">6 decimales</option>
+                <option value="8">8 decimales</option>
+            </select>
+        </div>
+        <button id="generate-matrix">
+            <span>🔄</span> Generar Matriz
+        </button>
+        <button id="random-matrix" class="btn-success">
+            <span>🎲</span> Valores Aleatorios
+        </button>
+        <button id="calculate" class="btn-warning">
+            <span>🧮</span> Reducir Matriz
+        </button>
+        <button id="clear-all" class="btn-danger">
+            <span>🗑️</span> Limpiar Todo
+        </button>
+    </div>
+    
+    <div class="matrix-container">
+        <h2>Matriz de Entrada</h2>
+        <div id="matrix-input" class="matrix-grid"></div>
+    </div>
+    
+    <div id="results" class="results">
+        <div class="matrix-container">
+            <h2>Matriz Reducida</h2>
+            <div id="matrix-result" class="matrix-grid"></div>
+        </div>
+        
+        <div class="matrix-container step-by-step">
+            <h2>Proceso de Reducción Paso a Paso</h2>
+            <div class="scrollable-container">
+                <div id="steps-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentMatrix = [];
+        let stepsHistory = [];
+        let stepCounter = 0;
+        let decimalPrecision = 4;
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar eventos
+            document.getElementById('generate-matrix').addEventListener('click', generateMatrix);
+            document.getElementById('random-matrix').addEventListener('click', generateRandomMatrix);
+            document.getElementById('calculate').addEventListener('click', calculateReduction);
+            document.getElementById('clear-all').addEventListener('click', clearAll);
+            document.getElementById('precision').addEventListener('change', updatePrecision);
+            
+            // Generar matriz inicial
+            generateMatrix();
+        });
+        
+        function updatePrecision() {
+            decimalPrecision = parseInt(document.getElementById('precision').value);
+        }
+        
+        function generateMatrix() {
+            const rows = parseInt(document.getElementById('rows').value);
+            const cols = parseInt(document.getElementById('cols').value);
+            const container = document.getElementById('matrix-input');
+            
+            // Validar tamaño
+            if (rows > 15 || cols > 15) {
+                alert("Para matrices más grandes, use una computadora para mejor rendimiento");
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            // Crear tabla
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            
+            // Crear encabezados de columnas
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th')); // Celda vacía para esquina
+            
+            for (let j = 0; j < cols; j++) {
+                const th = document.createElement('th');
+                th.textContent = `Col ${j+1}`;
+                headerRow.appendChild(th);
+            }
+            tbody.appendChild(headerRow);
+            
+            // Crear filas de la matriz
+            for (let i = 0; i < rows; i++) {
+                const tr = document.createElement('tr');
+                const th = document.createElement('th');
+                th.textContent = `Fila ${i+1}`;
+                tr.appendChild(th);
+                
+                for (let j = 0; j < cols; j++) {
+                    const td = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'matrix-cell';
+                    input.id = `cell-${i}-${j}`;
+                    input.value = currentMatrix[i] && currentMatrix[i][j] !== undefined ? 
+                        currentMatrix[i][j].toFixed(decimalPrecision) : '0';
+                    input.step = 'any';
+                    input.inputMode = 'decimal';
+                    
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+        
+        function generateRandomMatrix() {
+            const rows = parseInt(document.getElementById('rows').value);
+            const cols = parseInt(document.getElementById('cols').value);
+            
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const randomValue = (Math.random() * 20 - 10).toFixed(2);
+                    document.getElementById(`cell-${i}-${j}`).value = randomValue;
+                }
+            }
+        }
+        
+        function getMatrixFromInput() {
+            const rows = parseInt(document.getElementById('rows').value);
+            const cols = parseInt(document.getElementById('cols').value);
+            const matrix = [];
+            
+            for (let i = 0; i < rows; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    const value = parseFloat(document.getElementById(`cell-${i}-${j}`).value);
+                    if (isNaN(value)) {
+                        alert(`Valor inválido en Fila ${i+1}, Columna ${j+1}`);
+                        return null;
+                    }
+                    matrix[i][j] = value;
+                }
+            }
+            
+            return matrix;
+        }
+        
+        function calculateReduction() {
+            const matrix = getMatrixFromInput();
+            if (!matrix) return;
+            
+            // Resetear variables
+            currentMatrix = JSON.parse(JSON.stringify(matrix));
+            stepsHistory = [];
+            stepCounter = 0;
+            
+            // Mostrar sección de resultados
+            document.getElementById('results').style.display = 'block';
+            
+            // Paso 0: Matriz original
+            addStep("Matriz original", currentMatrix);
+            
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            let lead = 0;
+            
+            for (let r = 0; r < rows; r++) {
+                if (lead >= cols) break;
+                
+                let i = r;
+                while (Math.abs(currentMatrix[i][lead]) < 1e-10) {
+                    i++;
+                    if (i === rows) {
+                        i = r;
+                        lead++;
+                        if (lead === cols) {
+                            addStep(`No se encontró pivote en columna ${lead+1}`, currentMatrix);
+                            displayResults();
+                            return;
+                        }
+                    }
+                }
+                
+                // Intercambiar filas si es necesario
+                if (i !== r) {
+                    [currentMatrix[i], currentMatrix[r]] = [currentMatrix[r], currentMatrix[i]];
+                    addStep(`Intercambio: Fila ${i+1} ↔ Fila ${r+1}`, currentMatrix, r, lead);
+                }
+                
+                // Normalizar la fila del pivote
+                const pivotValue = currentMatrix[r][lead];
+                if (Math.abs(pivotValue - 1) > 1e-10 && Math.abs(pivotValue) > 1e-10) {
+                    for (let j = 0; j < cols; j++) {
+                        currentMatrix[r][j] /= pivotValue;
+                    }
+                    addStep(`Normalización: Fila ${r+1} ÷ ${formatNumber(pivotValue)}`, currentMatrix, r, lead);
+                }
+                
+                // Eliminación hacia adelante y atrás
+                for (let i = 0; i < rows; i++) {
+                    if (i !== r && Math.abs(currentMatrix[i][lead]) > 1e-10) {
+                        const factor = currentMatrix[i][lead];
+                        for (let j = 0; j < cols; j++) {
+                            currentMatrix[i][j] -= factor * currentMatrix[r][j];
+                            // Redondear a cero si es muy pequeño
+                            if (Math.abs(currentMatrix[i][j]) < 1e-10) currentMatrix[i][j] = 0;
+                        }
+                        addStep(`Eliminación: Fila ${i+1} ← Fila ${i+1} - (${formatNumber(factor)} × Fila ${r+1})`, 
+                               currentMatrix, r, lead);
+                    }
+                }
+                
+                lead++;
+            }
+            
+            displayResults();
+        }
+        
+        function addStep(description, matrix, pivotRow = null, pivotCol = null) {
+            stepsHistory.push({
+                number: ++stepCounter,
+                description: description,
+                matrix: JSON.parse(JSON.stringify(matrix)),
+                pivot: pivotRow !== null && pivotCol !== null ? { row: pivotRow, col: pivotCol } : null
+            });
+        }
+        
+        function formatNumber(value) {
+            if (Math.abs(value) < 1e-10) return "0";
+            return value.toFixed(decimalPrecision);
+        }
+        
+        function displayResults() {
+            // Mostrar matriz reducida
+            displayMatrix(currentMatrix, 'matrix-result');
+            
+            // Mostrar pasos
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = '';
+            
+            stepsHistory.forEach(step => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step';
+                
+                // Número de paso
+                const stepNumber = document.createElement('div');
+                stepNumber.className = 'step-number';
+                stepNumber.textContent = `Paso ${step.number}`;
+                stepDiv.appendChild(stepNumber);
+                
+                // Título del paso
+                const stepTitle = document.createElement('div');
+                stepTitle.className = 'step-title';
+                stepTitle.textContent = step.description;
+                stepDiv.appendChild(stepTitle);
+                
+                // Matriz del paso
+                const stepMatrixDiv = document.createElement('div');
+                stepMatrixDiv.className = 'step-matrix';
+                
+                const table = document.createElement('table');
+                const tbody = document.createElement('tbody');
+                
+                // Encabezados de columnas
+                const headerRow = document.createElement('tr');
+                headerRow.appendChild(document.createElement('th'));
+                
+                for (let j = 0; j < step.matrix[0].length; j++) {
+                    const th = document.createElement('th');
+                    th.textContent = `Col ${j+1}`;
+                    headerRow.appendChild(th);
+                }
+                tbody.appendChild(headerRow);
+                
+                // Filas de la matriz
+                for (let i = 0; i < step.matrix.length; i++) {
+                    const tr = document.createElement('tr');
+                    const th = document.createElement('th');
+                    th.textContent = `Fila ${i+1}`;
+                    tr.appendChild(th);
+                    
+                    for (let j = 0; j < step.matrix[i].length; j++) {
+                        const td = document.createElement('td');
+                        
+                        // Resaltar pivote
+                        if (step.pivot && i === step.pivot.row && j === step.pivot.col) {
+                            td.className = 'pivot-highlight';
+                        }
+                        
+                        // Resaltar elementos modificados
+                        if (step.number > 1 && stepsHistory[step.number-2]) {
+                            const prevValue = stepsHistory[step.number-2].matrix[i][j];
+                            if (Math.abs(prevValue - step.matrix[i][j]) > 1e-10) {
+                                td.classList.add('operation-highlight');
+                            }
+                        }
+                        
+                        td.textContent = formatNumber(step.matrix[i][j]);
+                        tr.appendChild(td);
+                    }
+                    tbody.appendChild(tr);
+                }
+                
+                table.appendChild(tbody);
+                stepMatrixDiv.appendChild(table);
+                stepDiv.appendChild(stepMatrixDiv);
+                stepsContainer.appendChild(stepDiv);
+            });
+            
+            // Desplazarse a los resultados
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayMatrix(matrix, elementId) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            
+            // Encabezados de columnas
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th'));
+            
+            for (let j = 0; j < matrix[0].length; j++) {
+                const th = document.createElement('th');
+                th.textContent = `Col ${j+1}`;
+                headerRow.appendChild(th);
+            }
+            tbody.appendChild(headerRow);
+            
+            // Filas de la matriz
+            for (let i = 0; i < matrix.length; i++) {
+                const tr = document.createElement('tr');
+                const th = document.createElement('th');
+                th.textContent = `Fila ${i+1}`;
+                tr.appendChild(th);
+                
+                for (let j = 0; j < matrix[i].length; j++) {
+                    const td = document.createElement('td');
+                    td.textContent = formatNumber(matrix[i][j]);
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+        
+        function clearAll() {
+            currentMatrix = [];
+            stepsHistory = [];
+            stepCounter = 0;
+            
+            document.getElementById('matrix-input').innerHTML = '';
+            document.getElementById('matrix-result').innerHTML = '';
+            document.getElementById('steps-container').innerHTML = '';
+            document.getElementById('results').style.display = 'none';
+            
+            generateMatrix();
+        }
+    </script>
+</body>
+</html>

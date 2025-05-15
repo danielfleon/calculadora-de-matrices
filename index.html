@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora Avanzada de Matrices</title>
+    <title>Calculadora de Matrices (Precisión Entera)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -12,7 +12,7 @@
             --dark: #333;
             --success: #27ae60;
             --warning: #f39c12;
-            --danger: #000000;
+            --danger: #e74c3c;
         }
         
         * {
@@ -233,8 +233,8 @@
 </head>
 <body>
     <header>
-        <h1>Calculadora Avanzada de Matrices</h1>
-        <p>Reducción por Gauss-Jordan con todos los pasos detallados</p>
+        <h1>Calculadora de Matrices (Precisión Entera)</h1>
+        <p>Reducción por Gauss-Jordan con precisión configurable desde 0 decimales</p>
     </header>
     
     <div class="controls">
@@ -249,10 +249,10 @@
         <div class="control-group">
             <label for="precision">Precisión decimal:</label>
             <select id="precision">
+                <option value="0" selected>0 decimales (enteros)</option>
+                <option value="1">1 decimal</option>
                 <option value="2">2 decimales</option>
-                <option value="4" selected>4 decimales</option>
-                <option value="6">6 decimales</option>
-                <option value="8">8 decimales</option>
+                <option value="4">4 decimales</option>
             </select>
         </div>
         <button id="generate-matrix">
@@ -293,7 +293,7 @@
         let currentMatrix = [];
         let stepsHistory = [];
         let stepCounter = 0;
-        let decimalPrecision = 4;
+        let decimalPrecision = 0; // Valor por defecto: 0 decimales
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
@@ -310,6 +310,10 @@
         
         function updatePrecision() {
             decimalPrecision = parseInt(document.getElementById('precision').value);
+            // Regenerar la visualización si ya hay resultados
+            if (stepsHistory.length > 0) {
+                displayResults();
+            }
         }
         
         function generateMatrix() {
@@ -354,8 +358,8 @@
                     input.className = 'matrix-cell';
                     input.id = `cell-${i}-${j}`;
                     input.value = currentMatrix[i] && currentMatrix[i][j] !== undefined ? 
-                        currentMatrix[i][j].toFixed(decimalPrecision) : '0';
-                    input.step = 'any';
+                        formatNumber(currentMatrix[i][j]) : '0';
+                    input.step = decimalPrecision === 0 ? '1' : 'any';
                     input.inputMode = 'decimal';
                     
                     td.appendChild(input);
@@ -374,7 +378,7 @@
             
             for (let i = 0; i < rows; i++) {
                 for (let j = 0; j < cols; j++) {
-                    const randomValue = (Math.random() * 20 - 10).toFixed(2);
+                    const randomValue = Math.floor(Math.random() * 20) - 10; // Valores enteros entre -10 y 10
                     document.getElementById(`cell-${i}-${j}`).value = randomValue;
                 }
             }
@@ -447,6 +451,8 @@
                 if (Math.abs(pivotValue - 1) > 1e-10 && Math.abs(pivotValue) > 1e-10) {
                     for (let j = 0; j < cols; j++) {
                         currentMatrix[r][j] /= pivotValue;
+                        // Redondear según la precisión seleccionada
+                        currentMatrix[r][j] = parseFloat(currentMatrix[r][j].toFixed(8));
                     }
                     addStep(`Normalización: Fila ${r+1} ÷ ${formatNumber(pivotValue)}`, currentMatrix, r, lead);
                 }
@@ -459,6 +465,8 @@
                             currentMatrix[i][j] -= factor * currentMatrix[r][j];
                             // Redondear a cero si es muy pequeño
                             if (Math.abs(currentMatrix[i][j]) < 1e-10) currentMatrix[i][j] = 0;
+                            // Redondear según la precisión seleccionada
+                            currentMatrix[i][j] = parseFloat(currentMatrix[i][j].toFixed(8));
                         }
                         addStep(`Eliminación: Fila ${i+1} ← Fila ${i+1} - (${formatNumber(factor)} × Fila ${r+1})`, 
                                currentMatrix, r, lead);
